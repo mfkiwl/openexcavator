@@ -9,8 +9,8 @@ It is designed to run on a Raspberry Pi (but can run on other devices as well) a
 ## Installation
 Install dependencies:
 ```
-sudo apt-get install python3-pip python3-dev
-sudo apt-get install dnsmasq hostapd #for Wi-Fi management if desired
+sudo apt-get install -y python3-pip python3-dev
+sudo apt-get install -y dnsmasq hostapd #for Wi-Fi management if desired
 sudo pip3 install tornado utm
 ```
 Since the application has a restart function it needs to run unde the Pi user:
@@ -18,9 +18,7 @@ Since the application has a restart function it needs to run unde the Pi user:
 sudo mkdir /var/www
 sudo chown -R pi:pi /var/www
 cd /var/www
-git clone https://github.com/dkwiebe/openexcavator
-mv /var/www/openexcavator/openexcavator/* /var/www/openexcavator
-rm -r /var/www/openexcavator/openexcavator
+git clone https://github.com/GwnDaan/openexcavator .
 python3 openexcavator/database.py #initialize database entries
 ```
 To enable the application to start at boot copy the `openexcavator.service` systemd file from the `scripts` folder to `/etc/systemd/system` and enable it using:
@@ -32,7 +30,8 @@ sudo systemctl enable openexcavator && sudo systemctl start openexcavator
 Check the logs to be sure the application is working as expected:
 ```
 journalctl -f -u openexcavator
-```
+``` 
+You should now be able to access the web interface on: https://ip-of-raspberry:8000/
 ### Wi-Fi
 The application can manage Wi-Fi connectivity so it can work with an existing network or standalone (in hotspot mode).  
 In order to manage the connectivity it needs an SSID and password defined (see Settings -> `Wi-Fi SSID` and `PWD`).  
