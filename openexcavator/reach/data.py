@@ -10,8 +10,8 @@ import time
 import utm
 from collections import deque
 
+from imu.imu import GenericIMU
 from reach.gps import ReachGPS
-from reach.imu import ReachIMU
 from rotate import get_new_position_rpy
 
 
@@ -24,9 +24,7 @@ class DataManager(threading.Thread):
         self.gps_queue = deque(maxlen=1)
         self.gps_client = ReachGPS(config["gps_host"], int(config["gps_port"]), self.gps_queue)
         self.gps_client.start()
-        self.imu_queue = deque(maxlen=1)
-        self.imu_client = ReachIMU(config["imu_host"], int(config["imu_port"]), self.imu_queue)
-        self.imu_client.start()
+        self.imu = GenericIMU(config)
         self.data_queue = data_queue
         self.utm_zone = {"num": None, "letter": None}
         self.antenna_height = float(self.config["antenna_height"])
@@ -39,7 +37,7 @@ class DataManager(threading.Thread):
             data = {"utm_zone": self.utm_zone}
             try:
                 data.update(self.gps_queue[-1])
-                data.update(self.imu_queue[-1])
+                data.update(self.imu.get_data())
                 if "lat" in data and "lng" in data:
                     if not self.utm_zone["num"]:
                         aux = utm.from_latlon(data["lat"], data["lng"])
@@ -70,7 +68,7 @@ class DataManager(threading.Thread):
                     data["delta"] = delta
                     if delta > 0.5:
                         logging.info("stopping IMU thread due to latency %s", delta)
-                        self.imu_client.disconnect_source()
+                        self.imu.disconnect_source()
                         time.sleep(1)
                     elif delta < -0.5:  # 500 ms
                         logging.info("stopping GPS thread due to latency %s", delta)
@@ -80,7 +78,7 @@ class DataManager(threading.Thread):
                 except Exception as exc:
                     logging.warning("cannot determine inter-thread latency: %s", exc)
                     self.gps_client.disconnect_source()
-                    self.imu_client.disconnect_source()
+                    self.imu.disconnect_source()
                     time.sleep(2)
             time.sleep(0.01)
 

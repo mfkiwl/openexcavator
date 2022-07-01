@@ -7,6 +7,7 @@ Created on Oct 11, 2017
 import logging
 import signal
 import sys
+import time
 import tornado.ioloop
 import tornado.web
 from collections import deque
@@ -68,7 +69,10 @@ def main():
     application.wifi_manager.start()
     logging.info("starting openexcavator on %s:%s ...", settings.ADDRESS, settings.PORT)
     application.listen(settings.PORT, address=settings.ADDRESS)
-    tornado.ioloop.IOLoop.instance().start()
+    tornado.ioloop.IOLoop.current().start()
+    
+    while True:
+        time.sleep(1)
 
 
 if __name__ == "__main__":
