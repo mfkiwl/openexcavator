@@ -52,9 +52,13 @@ static domain_name_servers=192.168.173.1
 Default hotspot SSID is `openexcavator` while the password is `somepass`; default IP address for the Pi is `192.168.173.1`.  
 Of course you can change the hotspot SSID and password if you need to; IP addresses can also be changed but make sure you edit both `dnsmasq` and `dhcpcd` files.   
 Reboot the Pi after installation and upon restart it should start managing Wi-Fi connectivity.
+### GPS Receiver
+TODO: add gps receiver setup.  
+Afterwards just make sure *GPS Host* and *Port* settings are correct and you should see GPS data (*longitude*, *latitude* and *altitude*) in the web application.
 ### IMU
-To integrate the IMU data as well, you need to install [imud](https://github.com/BWiebe1/imud).  
+TODO: add imu setup.  
 Afterwards just make sure *IMU Host* and *Port* settings are correct and you should see IMU data (*roll*, *pitch* and *yaw*) in the web application.
+
 ### nginx
 While not strictly necessary it's a good idea to put `nginx` in front of the web application.  
 To be able to serve **cached tiles** for the map, installing nginx is mandatory. By default it caches up to 2 GB of tiles for one year so loading the map once before going into hotspot mode should make the tiles available later on.
@@ -70,6 +74,6 @@ estart nginx using: `sudo systemctl restart nginx` and access the web applicatio
  - `database.py` holds database functions used to retrieve and update the configuration values (such as GPS host and port, IMU host and port, designated path, antenna height, safety height and start/stop altitude values); these values are stored in a SQLite3 database (`openexcavator.db`)  
  - `handlers.py` contains the implementation for the web application requests (render `home.html` and `tools.html`, return new position & IMU data from the threads, update configuration and restart application)  
  - `wifimanager.py` starts a thread to control Wi-Fi connectivity (enables hotspot when preferred network is not available)  
- -  the `reach` package has implementations for GPS and IMU TCP clients (to retrieve the data from the Reach device)  
  -  the application uses Javascript for map rendering and data calculations (relevant files in the `static` folder are `common.js`, `home.js`, `tools.js`)  
  -  the `scripts` folder contains the `systemd` service definition for openexcavator  
+ - TODO: add imu/gps code files
