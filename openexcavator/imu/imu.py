@@ -1,9 +1,8 @@
 from collections import deque
 import logging
-import socket
-import time
+from typing import Callable
 
-class GenericIMU():
+class IMUHandler():
     
     def __init__(self, config):
         self.threads = []
@@ -16,7 +15,7 @@ class GenericIMU():
         """
         return self.__data_func()
 
-    def __parse_data_func(self, config) -> function:
+    def __parse_data_func(self, config) -> Callable:
         """
         Parse a IMU data function with no parameters and and return it.
         :returns: function that return dict with: roll, pitch, yaw, imu_time.
@@ -40,7 +39,12 @@ class GenericIMU():
             return NotImplementedError
         
         if config["imu_type"] == "FXOS8700+FXAS21001":
-            return NotImplementedError
+            from imu.fxos8700_fxas21001 import FXOS8700_FXAS21002C
+            
+            fxos8700_fxas21001_imu = FXOS8700_FXAS21002C()
+            fxos8700_fxas21001_imu.start()
+            self.threads.append(fxos8700_fxas21001_imu)
+            return lambda: fxos8700_fxas21001_imu.get_data()
         
         return NotImplementedError
 

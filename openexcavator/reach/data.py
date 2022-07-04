@@ -10,7 +10,7 @@ import time
 import utm
 from collections import deque
 
-from imu.imu import GenericIMU
+from imu.imu import IMUHandler
 from reach.gps import ReachGPS
 from rotate import get_new_position_rpy
 
@@ -24,7 +24,7 @@ class DataManager(threading.Thread):
         self.gps_queue = deque(maxlen=1)
         self.gps_client = ReachGPS(config["gps_host"], int(config["gps_port"]), self.gps_queue)
         self.gps_client.start()
-        self.imu = GenericIMU(config)
+        self.imu = IMUHandler(config)
         self.data_queue = data_queue
         self.utm_zone = {"num": None, "letter": None}
         self.antenna_height = float(self.config["antenna_height"])

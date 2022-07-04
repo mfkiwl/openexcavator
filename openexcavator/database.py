@@ -58,6 +58,7 @@ def populate_config():
         ("gps_port", "9000"),
         ("imu_host", "127.0.0.1"),
         ("imu_port", "7000"),
+        ("imu_type", "FXOS8700+FXAS21001"),
         ("start_altitude", "700"),
         ("stop_altitude", "800"),
         ("antenna_height", "10"),
