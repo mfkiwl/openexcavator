@@ -69,6 +69,8 @@ The following libraries are required to use this IMU.
 ```
 sudo pip3 install --upgrade adafruit-python-shell
 sudo pip3 install adafruit-circuitpython-fxos8700 adafruit-circuitpython-fxas21002c
+sudo apt-get install -y libatlas-base-dev git
+sudo pip3 install git+https://github.com/Mayitzin/ahrs
 ```
 Next we need to enable the I2C port on the Raspberry PI.
 ```
