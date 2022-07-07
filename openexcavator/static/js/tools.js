@@ -8,11 +8,14 @@ let polyline = null;
 
 function initMap() {
 	myMap = L.map('mapid').setView([53.58442963725551, -110.51799774169922], 18);
-	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-		maxZoom: 22,
-		attribution: '&copy;<a href="http://mapbox.com">Mapbox</a>',
-		id: 'mapbox.streets'
-		}).addTo(myMap);
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+        tileSize: 512,
+        maxZoom: 22,
+        zoomOffset: -1,
+        id: 'mapbox/streets-v11',
+        accessToken: 'YOUR_MAPBOX_ACCESS_TOKEN'
+    }).addTo(myMap);
 	L.control.scale().addTo(myMap);
 	let popup = L.popup();
 	function onMapClick(e) {
@@ -43,8 +46,8 @@ function setValuesData(prefix, data) {
 	$('#' + prefix + 'lat').html(data.lat.toFixed(8));
 	$('#' + prefix + 'lng').html(data.lng.toFixed(8));
 	let fix = data.fix;
-	if (data.fix === 1) {
-		fix = 'single';
+	if (data.fix === 1 || data.fix === 2) {
+		fix = '3D';
 		$('#' + prefix + 'acc').css('color', 'red');
 	} else if (data.fix === 4){
 		$('#' + prefix + 'acc').css('color', 'green');
@@ -53,7 +56,7 @@ function setValuesData(prefix, data) {
 		$('#' + prefix + 'acc').css('color', '#CCCC00');
 		fix = 'float';
 	}
-	$('#' + prefix + 'acc').html(data.acc.toFixed(2) + '/' + fix);
+	$('#' + prefix + 'acc').html(data.acc.toFixed(2) + ' / ' + data.vacc.toFixed(2) + " / " + data.hacc.toFixed(2) + " / " + fix);
 	$('#' + prefix + 'tim').html(data.ts);
 	let value = data.alt - antennaHeight;
 	$('#' + prefix + 'alt').html(value.toFixed(2));
