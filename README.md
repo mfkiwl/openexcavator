@@ -57,8 +57,15 @@ Reboot the Pi after installation and upon restart it should start managing Wi-Fi
 
 ---
 ## GPS Receiver
-TODO: add gps receiver setup.  
+TODO: add reach gps receiver setup.  
 Afterwards just make sure *GPS Host* and *Port* settings are correct and you should see GPS data (*longitude*, *latitude* and *altitude*) in the web application.
+
+### UBX Receiver
+The following libraries are required to use this GPS receiver.
+```
+sudo pip3 install --upgrade pyubx2
+```
+**Note:** there are still some undocumented steps required to use this receiver.
 
 ---
 ## IMU
@@ -80,6 +87,7 @@ Then uncomment/add the following line:
 ```
 dtparam=i2c_arm=on
 ```
+**Note:** there are still some undocumented steps required to use this IMU.
 
 ---
 ## nginx
