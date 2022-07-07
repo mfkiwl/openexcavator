@@ -4,14 +4,14 @@ Created on Apr 15, 2019
 @author: ionut
 """
 
+import datetime
 import logging
 import threading
 import time
 import utm
-from collections import deque
 
+from gps.gps import GPSHandler
 from imu.imu import IMUHandler
-from reach.gps import ReachGPS
 from rotate import get_new_position_rpy
 
 
@@ -19,11 +19,9 @@ class DataManager(threading.Thread):
     """Collect GPS and IMU data and merge it with offset position calculation"""
 
     def __init__(self, config, data_queue):
-        super().__init__()
+        super().__init__(daemon=True)
         self.config = config
-        self.gps_queue = deque(maxlen=1)
-        self.gps_client = ReachGPS(config["gps_host"], int(config["gps_port"]), self.gps_queue)
-        self.gps_client.start()
+        self.gps = GPSHandler(config)
         self.imu = IMUHandler(config)
         self.data_queue = data_queue
         self.utm_zone = {"num": None, "letter": None}
@@ -36,7 +34,7 @@ class DataManager(threading.Thread):
         while self.running:
             data = {"utm_zone": self.utm_zone}
             try:
-                data.update(self.gps_queue[-1])
+                data.update(self.gps.get_data())
                 data.update(self.imu.get_data())
                 if "lat" in data and "lng" in data:
                     if not self.utm_zone["num"]:
@@ -72,12 +70,12 @@ class DataManager(threading.Thread):
                         time.sleep(1)
                     elif delta < -0.5:  # 500 ms
                         logging.info("stopping GPS thread due to latency %s", delta)
-                        self.gps_client.disconnect_source()
+                        self.gps.disconnect_source()
                         time.sleep(1)
 
                 except Exception as exc:
                     logging.warning("cannot determine inter-thread latency: %s", exc)
-                    self.gps_client.disconnect_source()
+                    self.gps.disconnect_source()
                     self.imu.disconnect_source()
                     time.sleep(2)
             time.sleep(0.01)
@@ -85,3 +83,5 @@ class DataManager(threading.Thread):
     def stop(self):
         """Set property to stop thread"""
         self.running = False
+        self.gps.stop()
+        self.imu.stop()
