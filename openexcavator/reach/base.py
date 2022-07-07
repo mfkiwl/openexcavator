@@ -14,7 +14,7 @@ class Reach(threading.Thread):
     """TCP client implementation for Reach GPS & IMU data receiver"""
 
     def __init__(self, host, port, queue, message_delimiter=""):
-        super().__init__()
+        super().__init__(daemon=True)
         self.host = host
         self.port = port
         self.queue = queue

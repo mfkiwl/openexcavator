@@ -15,7 +15,7 @@ class WifiManager(threading.Thread):
     """WifiManager class to control wifi (client or hotspot mode)"""
 
     def __init__(self, network_name, psk):
-        super().__init__()
+        super().__init__(daemon=True)
         self.network_name = network_name
         self.psk = psk
         self.mode = None

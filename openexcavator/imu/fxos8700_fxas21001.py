@@ -1,4 +1,5 @@
 from collections import deque
+import datetime
 import threading
 import time
 import board
@@ -6,7 +7,7 @@ from adafruit_fxos8700 import FXOS8700
 from adafruit_fxas21002c import FXAS21002C
 
 import ahrs
-from ahrs.filters import EKF
+from ahrs.filters import Madgwick as Filter
 import numpy as np
 
 # Accelerometer correction values
@@ -25,7 +26,7 @@ class FXOS8700_FXAS21002C(threading.Thread):
         """
         :param i2c: I2C bus, will be created if not supplied.
         """
-        super().__init__()
+        super().__init__(daemon=True)
         # TODO: add try/except block for notifying the user when the IMU is not/incorrectly connected
         # start I2C driver and initialize FXOS8700 and FXAS21002C
         if not i2c:
@@ -51,10 +52,10 @@ class FXOS8700_FXAS21002C(threading.Thread):
 
     def read_magnetometer(self):
         """
-        Read the raw magnetometer value (nTesla).
+        Read the raw magnetometer value (uTesla).
         :returns: magnetometer x,y,z
         """
-        return np.subtract(np.divide(np.asarray(self.__fxos.magnetometer), 1000), MAG_SUB)
+        return np.subtract(np.asarray(self.__fxos.magnetometer), MAG_SUB)
 
     def read_gyroscope(self):
         """
@@ -67,15 +68,16 @@ class FXOS8700_FXAS21002C(threading.Thread):
         """
         Start the fusion model updating loop.
         """
-        ekf = EKF()
-        q = ahrs.common.orientation.ecompass(self.read_accelerometer(), self.read_magnetometer(), frame='ENU', representation='quaternion')
+        self.running=True
+        filter = Filter()
+        q = ahrs.common.orientation.ecompass(self.read_accelerometer(), self.read_magnetometer(), frame='NED', representation='quaternion')
         while True:
             data = self.read_all()
-            now = time.time()
-            q = ekf.update(q, *data, dt=now - self.__imu_time if self.__imu_time else None)
+            now = datetime.datetime.utcnow().timestamp()
+            q = filter.updateMARG(q, *data, dt=now - self.__imu_time if self.__imu_time else None)
             self.__imu_time = now
             self.__data_queue.append(ahrs.common.orientation.q2rpy(q, in_deg=True))
-            time.sleep(0) # Allow other threads to access i2c bus.
+            time.sleep(0.05) # Allow other threads to access i2c bus.
 
     def get_data(self):
         """
@@ -87,6 +89,10 @@ class FXOS8700_FXAS21002C(threading.Thread):
                 "pitch": data[1],
                 "yaw": data[2],
                 "imu_time": self.__imu_time}
+    
+    def stop(self):
+        """Set property to stop thread"""
+        self.running = False
 
 def test_loop():
     imu = FXOS8700_FXAS21002C()
