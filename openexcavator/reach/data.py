@@ -9,6 +9,8 @@ import logging
 import threading
 import time
 import utm
+import adafruit_tca9548a
+import board
 
 from gps.gps import GPSHandler
 from imu.imu import IMUHandler
@@ -22,7 +24,7 @@ class DataManager(threading.Thread):
         super().__init__(daemon=True)
         self.config = config
         self.gps = GPSHandler(config)
-        self.imu = IMUHandler(config)
+        self.imu = IMUHandler(config, adafruit_tca9548a.TCA9548A(board.I2C())[2])
         self.data_queue = data_queue
         self.utm_zone = {"num": None, "letter": None}
         self.antenna_height = float(self.config["antenna_height"])
@@ -42,18 +44,24 @@ class DataManager(threading.Thread):
                         self.utm_zone["num"] = aux[2]
                         self.utm_zone["letter"] = aux[3]
                     if "roll" in data and "pitch" in data and "yaw" in data:
-                        aux = get_new_position_rpy(data["lng"], data["lat"], data["alt"], self.antenna_height,
-                                                   data["roll"], data["pitch"], data["yaw"], self.utm_zone)
-                        data.update({
-                            "_lng": data["lng"],
-                            "_lat": data["lat"],
-                            "_alt": data["alt"]
-                        })
-                        data.update({
-                            "lng": aux[0],
-                            "lat": aux[1],
-                            "alt": aux[2]
-                        })
+                        aux = get_new_position_rpy(
+                            data["lng"],
+                            data["lat"],
+                            data["alt"],
+                            self.antenna_height,
+                            data["roll"],
+                            data["pitch"],
+                            data["yaw"],
+                            self.utm_zone,
+                        )
+                        data.update(
+                            {
+                                "_lng": data["lng"],
+                                "_lat": data["lat"],
+                                "_alt": data["alt"],
+                            }
+                        )
+                        data.update({"lng": aux[0], "lat": aux[1], "alt": aux[2]})
                 self.data_queue.append(data)
             except (ValueError, IndexError) as exc:
                 data["err"] = "%s" % exc

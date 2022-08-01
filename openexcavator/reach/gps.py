@@ -28,8 +28,8 @@ class ReachGPS(Reach):
         :returns dd.ddddd coordinate
         """
         dot_position = coord.find(".")
-        degrees = coord[:dot_position-2]
-        minutes = coord[dot_position-2:]
+        degrees = coord[: dot_position - 2]
+        minutes = coord[dot_position - 2 :]
         degrees = float(degrees) + float(minutes) / 60.0
         if hemi in ["S", "W"]:
             degrees = degrees * -1
@@ -44,7 +44,9 @@ class ReachGPS(Reach):
                 if parts[2] != "A":
                     logging.warning("invalid GNRMC data: %s", sentence)
                     continue
-                position["ts"] = datetime.datetime.strptime(parts[9]+parts[1], "%d%m%y%H%M%S.%f")
+                position["ts"] = datetime.datetime.strptime(
+                    parts[9] + parts[1], "%d%m%y%H%M%S.%f"
+                )
                 position["ts"] = position["ts"].replace(tzinfo=datetime.timezone.utc)
                 position["lat"] = self.parse_coordinate(parts[3], parts[4])
                 position["lng"] = self.parse_coordinate(parts[5], parts[6])

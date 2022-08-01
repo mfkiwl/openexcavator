@@ -89,6 +89,14 @@ dtparam=i2c_arm=on
 ```
 **Note:** there are still some undocumented steps required to use this IMU.
 
+## Multi IMU
+Multiple IMU's can be used in combination with the TCA9548 I2C multiplexer.
+
+The following libraries need to be installed to use the multiplexer:
+```
+sudo pip3 install adafruit-circuitpython-tca9548a
+```
+TODO: add configuration steps
 ---
 ## nginx
 While not strictly necessary it's a good idea to put `nginx` in front of the web application.  

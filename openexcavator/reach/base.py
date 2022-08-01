@@ -40,8 +40,12 @@ class Reach(threading.Thread):
         while self.running:
             try:
                 if not self.connection:
-                    self.connection = socket.create_connection((self.host, self.port), 3)
-                    self.connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                    self.connection = socket.create_connection(
+                        (self.host, self.port), 3
+                    )
+                    self.connection.setsockopt(
+                        socket.IPPROTO_TCP, socket.TCP_NODELAY, 1
+                    )
                 data = self.connection.recv(self.conn_buf)
                 if not data:
                     raise Exception("no data received on socket for 3 seconds")
@@ -52,19 +56,31 @@ class Reach(threading.Thread):
                         message = buffer[marker:]
                     else:
                         message = buffer
-                    logging.debug("parsing chunk [%d:%d] (length %d) from buffer on port %d",
-                                  marker, len(buffer), len(message), self.port)
+                    logging.debug(
+                        "parsing chunk [%d:%d] (length %d) from buffer on port %d",
+                        marker,
+                        len(buffer),
+                        len(message),
+                        self.port,
+                    )
                     data = self.parse_data(message)
                     self.queue.append(data)
                     buffer = ""
                 elif len(buffer) > self.tcp_buf_len:
-                    logging.warning("no valid GNRMC/IMU data received from %s:%s, clearing buffer",
-                                    self.host, self.port)
+                    logging.warning(
+                        "no valid GNRMC/IMU data received from %s:%s, clearing buffer",
+                        self.host,
+                        self.port,
+                    )
                     buffer = ""
                     self.queue.append({})
             except Exception as exc:
-                logging.error("cannot update data: %s, reconnecting to %s:%s", exc,
-                              self.host, self.port)
+                logging.error(
+                    "cannot update data: %s, reconnecting to %s:%s",
+                    exc,
+                    self.host,
+                    self.port,
+                )
                 self.connection = None
                 self.queue.append({})
                 time.sleep(3)
